@@ -31,6 +31,16 @@ export interface NPCRelationship {
   lastInteractionSummary: string;
 }
 
+export interface GameMessage {
+  role: 'player' | 'narrator' | 'opponent' | 'system';
+  content: string;
+  imageUrl?: string;
+  kokusen?: boolean;
+  npcIntervention?: string;
+  consequence?: string;
+  sources?: { title: string, uri: string }[];
+}
+
 export interface User {
   username: string;
   password?: string;
@@ -80,17 +90,11 @@ export interface Item {
   iconUrl?: string;
 }
 
-export interface ActionEvaluation {
-  status: 'ACERTO' | 'ERRO' | 'CRÍTICO' | 'VERGONHA_ALHEIA';
-  damageDealt: number;
-  qiCost: number;
-}
-
 export interface WorldState {
   currentArcId: string;
   arcProgress: number; 
   currentLocation: string;
-  chaosLevel: number; // 0 a 100, define o quão bizarra a IA narra
+  chaosLevel: number;
   npcRelationships: Record<string, NPCRelationship>;
 }
 

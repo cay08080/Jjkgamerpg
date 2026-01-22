@@ -30,8 +30,18 @@ const App: React.FC = () => {
 
   const handleCharComplete = (char: Character) => {
     if (!currentUser) return;
+    
+    const isCurse = char.origin === 'Maldição';
+    const initialWorld: WorldState = {
+      currentArcId: ANIME_TIMELINE[0].id,
+      arcProgress: 0,
+      currentLocation: isCurse ? 'Esgoto de Luxo' : 'Escola de Jujutsu (No meio de uma aula chata)',
+      chaosLevel: 10,
+      npcRelationships: {} 
+    };
+    
+    const updatedUser = { ...currentUser, character: char, worldState: initialWorld };
     setCharacter(char);
-    const updatedUser = { ...currentUser, character: char };
     saveUserData(updatedUser);
     setStage(GameStage.PLAYING);
   };
@@ -43,19 +53,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-0 flex flex-col items-center justify-center bg-[#050508] text-white">
+    <div className="min-h-screen p-0 flex flex-col items-center justify-center">
       {stage === GameStage.AUTH && <AuthScreen onLogin={handleLogin} />}
 
       {stage === GameStage.START && (
         <div className="text-center space-y-12 max-w-2xl animate-in fade-in p-4">
-          <div className="space-y-2">
-            <h1 className="text-6xl sm:text-8xl font-bungee leading-none tracking-tighter">JUJUTSU <br/> <span className="text-purple-500">PARÓDIA</span></h1>
-            <p className="text-xs font-mono text-white/30 tracking-[0.5em] uppercase">O RPG mais disfuncional da fenda temporal</p>
+          <div className="space-y-4">
+            <h1 className="text-6xl sm:text-8xl font-bungee leading-none text-white italic">JUJUTSU <br/> <span className="text-purple-500">PARÓDIA</span></h1>
+            <p className="text-sm font-marker text-white/40 italic">"Tente não morrer de vergonha alheia."</p>
           </div>
-          <div className="p-8 glass-panel rounded-3xl border border-white/5 space-y-6">
-            <p className="font-marker text-xl text-white/70 italic">"Coma dedos, chore em flashbacks e tente não ser cancelado pelas maldições."</p>
-            <button onClick={() => setStage(GameStage.CHARACTER_CREATION)} className="w-full py-6 bg-white text-black font-bungee rounded-2xl hover:bg-purple-600 hover:text-white transition-all shadow-2xl text-xl tracking-widest">ASSINAR O ROTEIRO</button>
-          </div>
+          <button onClick={() => setStage(GameStage.CHARACTER_CREATION)} className="w-full sm:w-80 py-6 bg-white text-black font-bungee rounded-2xl hover:bg-purple-600 hover:text-white transition-all shadow-2xl text-xl">ENTRAR NO ROTEIRO</button>
         </div>
       )}
 
@@ -76,9 +83,9 @@ const App: React.FC = () => {
 
       {stage === GameStage.GAMEOVER && (
         <div className="max-w-xl w-full glass-panel p-16 rounded-[3rem] text-center space-y-10 border-2 border-red-600/30">
-            <h2 className="text-6xl font-bungee text-red-600 italic">MORTE (MEME)</h2>
-            <p className="text-xl font-marker text-white/80 italic">"Você virou figurante de fundo. O Gege Akutami finalmente te pegou."</p>
-            <button onClick={() => setStage(GameStage.START)} className="w-full py-6 bg-white text-black font-bungee rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-2xl">REENCARNAR COMO FIGURANTE</button>
+            <h2 className="text-6xl font-bungee text-red-600">DERROTA MÁXIMA</h2>
+            <p className="text-xl font-marker text-white/70 italic">"Você virou um flashback triste de alguém."</p>
+            <button onClick={() => setStage(GameStage.START)} className="w-full py-6 bg-white text-black font-bungee rounded-2xl hover:bg-red-600 transition-all">TENTAR OUTRO RECEPTÁCULO</button>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Character, GameMessage, WorldState, Item, ANIME_TIMELINE } from "../types";
+import { Character, GameMessage, WorldState } from "../types";
 
 const sanitizeForPrompt = (obj: any) => {
   if (!obj) return obj;
@@ -25,24 +25,33 @@ const sanitizeForPrompt = (obj: any) => {
 
 export const generateSceneImage = async (prompt: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: `JJK Anime style parody, colorful, funny, over-the-top character expressions, cinematic lighting: ${prompt}` }] },
-    config: { imageConfig: { aspectRatio: "16:9" } }
-  });
-  const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
-  return part ? `data:image/png;base64,${part.inlineData.data}` : undefined;
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { parts: [{ text: `Anime style JJK parody, funny, expressive characters, cinematic lighting: ${prompt}` }] },
+      config: { imageConfig: { aspectRatio: "16:9" } }
+    });
+    const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    return part ? `data:image/png;base64,${part.inlineData.data}` : undefined;
+  } catch (e) {
+    console.error("Erro ao gerar imagem:", e);
+    return undefined;
+  }
 };
 
 export const generateCharacterProfile = async (appearance: string, name: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: `Funny and expressive JJK character portrait, anime style, iconic features: ${appearance}` }] },
-    config: { imageConfig: { aspectRatio: "1:1" } }
-  });
-  const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
-  return part ? `data:image/png;base64,${part.inlineData.data}` : undefined;
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { parts: [{ text: `Funny anime character portrait JJK style, iconic look: ${appearance}` }] },
+      config: { imageConfig: { aspectRatio: "1:1" } }
+    });
+    const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    return part ? `data:image/png;base64,${part.inlineData.data}` : undefined;
+  } catch (e) {
+    return undefined;
+  }
 };
 
 export const generateNarrative = async (
@@ -55,30 +64,27 @@ export const generateNarrative = async (
   const model = 'gemini-3-flash-preview';
 
   const systemInstruction = `
-    VOCÊ É O NARRADOR DE UMA PARÓDIA CAÓTICA DE JUJUTSU KAISEN (ESTILO JUJUTSU STROLL / GINTAMA).
+    VOCÊ É O NARRADOR DE UMA PARÓDIA CAÓTICA DE JUJUTSU KAISEN.
     
-    PERSONALIDADE:
-    - Sarcástico, quebra a quarta parede, faz bullying carinhoso com o jogador.
-    - Se a ação for épica: Descreva como se fosse o momento mais importante do anime, mas com um toque ridículo.
-    - Se a ação for burra: Descreva o fracasso de forma hilária, focando na vergonha alheia.
-    - Chame o jogador de "Figurante" ou "O Cara do Roteiro" ocasionalmente.
-
-    REGRAS DE HUMOR:
-    - KOKUSEN (Black Flash) vira "KOKUSEN DE COMÉDIA" quando algo muito engraçado acontece.
-    - O "Nível de Caos" do mundo aumenta se o jogador fizer piadas ou ações absurdas.
-
-    JSON OBRIGATÓRIO:
+    ESTILO: Sarcástico, quebra a quarta parede (meta-humor), ácido e hilário.
+    OBJETIVO: Transformar o sofrimento do mundo JJK em situações de comédia absurda.
+    
+    REGRAS:
+    - KOKUSEN (Black Flash) vira "Kokusen de Comédia" e acontece quando a ação é ridícula demais ou épica de um jeito idiota.
+    - Se o jogador errar, descreva o fracasso focando na vergonha alheia.
+    - Intervenções de NPCs: NPCs do anime podem aparecer só para fazer comentários sarcásticos.
+    
+    RETORNE SEMPRE UM JSON NESTE FORMATO:
     {
-      "narrative": "Texto engraçado e sarcástico narrando a ação...",
-      "imagePrompt": "Prompt visual bizarro e colorido para a cena.",
+      "narrative": "Texto da narração com humor ácido...",
+      "imagePrompt": "Prompt visual detalhado (estilo paródia colorida)...",
       "actionEvaluation": { "status": "ACERTO"|"ERRO"|"CRÍTICO"|"VERGONHA_ALHEIA", "damageDealt": n, "qiCost": n },
       "kokusen": boolean,
       "chaosIncrease": n,
-      "npcUpdate": { "name": "...", "affinityDelta": n, "newStatus": "...", "location": "...", "isAlive": boolean },
-      "interventionOccurred": "Nome do NPC fazendo algo ridículo",
-      "xpGain": n,
       "hpChange": n,
-      "suggestions": ["Ação Sóbria", "Ação Tática", "Ação Completamente Idiota"]
+      "xpGain": n,
+      "interventionOccurred": "Nome do NPC (ou null)",
+      "suggestions": ["Ação Sóbria", "Ação Tática", "Ação Completamente Maluca"]
     }
   `;
 
@@ -86,10 +92,9 @@ export const generateNarrative = async (
     model,
     contents: { 
       parts: [
-        { text: `JOGADOR: ${character.name} (Motivação: ${character.motivation})` },
-        { text: `ESTADO: ${JSON.stringify(sanitizeForPrompt(character))}` },
-        { text: `HISTÓRICO: ${JSON.stringify(sanitizeForPrompt(history.slice(-3)))}` },
-        { text: `NÍVEL DE CAOS ATUAL: ${worldState.chaosLevel}` },
+        { text: `JOGADOR: ${character.name} (Técnica: ${character.technique})` },
+        { text: `CONTEXTO ATUAL: ${worldState.currentLocation}, Caos: ${worldState.chaosLevel}%` },
+        { text: `HISTÓRICO: ${JSON.stringify(sanitizeForPrompt(history.slice(-2)))}` },
         { text: `AÇÃO DO JOGADOR: ${userInput}` }
       ] 
     },
@@ -97,13 +102,42 @@ export const generateNarrative = async (
   });
 
   try {
-    const text = response.text || "{}";
-    return JSON.parse(text);
+    return JSON.parse(response.text || "{}");
   } catch (e) {
     return { 
-      narrative: "Até eu, o narrador, perdi as palavras com essa sua burrice. Parabéns.", 
-      suggestions: ["Tentar de novo", "Chorar no banho"],
-      actionEvaluation: { status: 'ERRO', damageDealt: 0, qiCost: 10 }
+      narrative: "A realidade quebrou porque você foi idiota demais. Parabéns.", 
+      suggestions: ["Tentar consertar o universo", "Chorar"],
+      actionEvaluation: { status: "ERRO", damageDealt: 0, qiCost: 5 }
     };
   }
+};
+
+export const arbitratePvP = async (p1: Character, p2: Character, p1Action: string, p2Action: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const model = 'gemini-3-flash-preview';
+
+  const systemInstruction = `
+    ARBITRO DE LUTA JJK (VERSÃO PARÓDIA).
+    Narração visceral, mas focada no humor da colisão de poderes.
+    
+    RETORNE JSON:
+    {
+      "narrative": "string",
+      "p1Damage": number,
+      "p1QiCost": number,
+      "p2Damage": number,
+      "p2QiCost": number,
+      "kokusen": boolean
+    }
+  `;
+
+  const response = await ai.models.generateContent({
+    model,
+    contents: {
+      parts: [{ text: `P1 (${p1.name}): ${p1Action} | P2 (${p2.name}): ${p2Action}` }]
+    },
+    config: { systemInstruction, responseMimeType: "application/json" }
+  });
+
+  return JSON.parse(response.text || "{}");
 };
