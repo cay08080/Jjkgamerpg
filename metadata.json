@@ -1,5 +1,7 @@
 {
-  "name": "Copy of Copy of Jujutsu: Além do Vazio Principal Place DeathSong",
-  "description": "Um RPG tático e narrativo no universo de Jujutsu Kaisen, onde a IA molda um destino imprevisível e cheio de humor.",
-  "requestFramePermissions": []
+  "name": "Jujutsu: Além do Vazio (Caótico)",
+  "description": "Um RPG narrativo e absurdo onde a IA é um narrador sarcástico que molda o mundo de Jujutsu Kaisen com humor ácido e escolhas imprevisíveis.",
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

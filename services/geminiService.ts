@@ -27,7 +27,7 @@ export const generateSceneImage = async (prompt: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: `JJK Anime style, cinematic, high quality: ${prompt}` }] },
+    contents: { parts: [{ text: `JJK Anime style parody, colorful, funny, over-the-top character expressions, cinematic lighting: ${prompt}` }] },
     config: { imageConfig: { aspectRatio: "16:9" } }
   });
   const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -38,60 +38,11 @@ export const generateCharacterProfile = async (appearance: string, name: string)
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: `Official JJK character art: ${appearance}` }] },
+    contents: { parts: [{ text: `Funny and expressive JJK character portrait, anime style, iconic features: ${appearance}` }] },
     config: { imageConfig: { aspectRatio: "1:1" } }
   });
   const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
   return part ? `data:image/png;base64,${part.inlineData.data}` : undefined;
-};
-
-export const arbitratePvP = async (
-  p1: Character,
-  p2: Character,
-  p1Action: string,
-  p2Action: string
-) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const model = 'gemini-3-flash-preview';
-
-  const systemInstruction = `
-    VOCÊ É O MESTRE SUPREMO DE COMBATE DE JUJUTSU KAISEN. 
-    REGRAS DE ARBITRAGEM PvP:
-    - Analise se as ações são possíveis baseadas na técnica e nível dos feiticeiros/maldições.
-    - Considere o custo de Energia Amaldiçoada (Qi). Se o Qi for insuficiente, a ação falha ou é muito fraca.
-    - O combate entre Feiticeiros e Maldições deve ser letal e visceral.
-    - Calcule o dano baseado na Força e Energia.
-    - Determine se houve Black Flash (Kokusen) em acertos críticos físicos.
-    - O tom deve ser épico e narrativo, como o mangá.
-
-    RETORNO JSON OBRIGATÓRIO:
-    {
-      "narrative": "A descrição detalhada e épica do choque de poderes...",
-      "p1Damage": number,
-      "p1QiCost": number,
-      "p2Damage": number,
-      "p2QiCost": number,
-      "kokusen": boolean,
-      "winner": "P1" | "P2" | null
-    }
-  `;
-
-  const response = await ai.models.generateContent({
-    model,
-    contents: {
-      parts: [
-        { text: `P1 (${p1.name}, ${p1.origin}, LVL ${p1.level}, Técnica: ${p1.technique}, Qi: ${p1.currentQi}): ${p1Action}` },
-        { text: `P2 (${p2.name}, ${p2.origin}, LVL ${p2.level}, Técnica: ${p2.technique}, Qi: ${p2.currentQi}): ${p2Action}` }
-      ]
-    },
-    config: { systemInstruction, responseMimeType: "application/json" }
-  });
-
-  try {
-    return JSON.parse(response.text || "{}");
-  } catch (e) {
-    return { narrative: "O combate foi interrompido por um choque de energias.", p1Damage: 10, p2Damage: 10, p1QiCost: 5, p2QiCost: 5, kokusen: false, winner: null };
-  }
 };
 
 export const generateNarrative = async (
@@ -104,32 +55,30 @@ export const generateNarrative = async (
   const model = 'gemini-3-flash-preview';
 
   const systemInstruction = `
-    VOCÊ É O NARRADOR SUPREMO DE JUJUTSU KAISEN.
+    VOCÊ É O NARRADOR DE UMA PARÓDIA CAÓTICA DE JUJUTSU KAISEN (ESTILO JUJUTSU STROLL / GINTAMA).
     
-    DIRETRIZES DE ORIGEM (CRITICAL):
-    - Se o jogador for MALDIÇÃO: Ele é uma maldição recém-nascida do medo humano. Ele JAMAIS entra na escola de Jujutsu como aluno. Ele deve iniciar em locais hostis (esgotos, zonas de guerra, florestas). Suas interações com humanos e feiticeiros são naturalmente violentas ou predatórias. Afinidade com feiticeiros é quase impossível.
-    - Se o jogador for HUMANO: Ele é um aluno novo na Escola de Jujutsu (fluxo padrão).
-    
-    TONALIDADE: Humor ácido, ironia, drama shonen e horror corporal.
-    
-    REGRAS:
-    - KOKUSEN apenas em combate real crítico.
-    - Avalie cada ação do jogador com base em sua técnica e nível.
+    PERSONALIDADE:
+    - Sarcástico, quebra a quarta parede, faz bullying carinhoso com o jogador.
+    - Se a ação for épica: Descreva como se fosse o momento mais importante do anime, mas com um toque ridículo.
+    - Se a ação for burra: Descreva o fracasso de forma hilária, focando na vergonha alheia.
+    - Chame o jogador de "Figurante" ou "O Cara do Roteiro" ocasionalmente.
+
+    REGRAS DE HUMOR:
+    - KOKUSEN (Black Flash) vira "KOKUSEN DE COMÉDIA" quando algo muito engraçado acontece.
+    - O "Nível de Caos" do mundo aumenta se o jogador fizer piadas ou ações absurdas.
 
     JSON OBRIGATÓRIO:
     {
-      "narrative": "...",
-      "imagePrompt": "...",
-      "actionEvaluation": { "status": "ACERTO"|"ERRO"|"CRÍTICO", "damageDealt": n, "qiCost": n },
+      "narrative": "Texto engraçado e sarcástico narrando a ação...",
+      "imagePrompt": "Prompt visual bizarro e colorido para a cena.",
+      "actionEvaluation": { "status": "ACERTO"|"ERRO"|"CRÍTICO"|"VERGONHA_ALHEIA", "damageDealt": n, "qiCost": n },
       "kokusen": boolean,
+      "chaosIncrease": n,
       "npcUpdate": { "name": "...", "affinityDelta": n, "newStatus": "...", "location": "...", "isAlive": boolean },
-      "interventionOccurred": "Nome do NPC",
-      "butterflyConsequence": "Consequência",
-      "arcProgressGain": n,
+      "interventionOccurred": "Nome do NPC fazendo algo ridículo",
       "xpGain": n,
       "hpChange": n,
-      "isFatalBlow": boolean,
-      "suggestions": ["...", "...", "..."]
+      "suggestions": ["Ação Sóbria", "Ação Tática", "Ação Completamente Idiota"]
     }
   `;
 
@@ -137,22 +86,24 @@ export const generateNarrative = async (
     model,
     contents: { 
       parts: [
-        { text: `ORIGEM DO JOGADOR: ${character.origin}` },
-        { text: `PERFIL: ${JSON.stringify(sanitizeForPrompt(character))}` },
-        { text: `LOCAL: ${worldState.currentLocation}` },
-        { text: `HISTÓRICO: ${JSON.stringify(sanitizeForPrompt(history.slice(-4)))}` },
-        { text: `AÇÃO: ${userInput}` }
+        { text: `JOGADOR: ${character.name} (Motivação: ${character.motivation})` },
+        { text: `ESTADO: ${JSON.stringify(sanitizeForPrompt(character))}` },
+        { text: `HISTÓRICO: ${JSON.stringify(sanitizeForPrompt(history.slice(-3)))}` },
+        { text: `NÍVEL DE CAOS ATUAL: ${worldState.chaosLevel}` },
+        { text: `AÇÃO DO JOGADOR: ${userInput}` }
       ] 
     },
-    config: { systemInstruction, responseMimeType: "application/json", tools: [{ googleSearch: {} }] }
+    config: { systemInstruction, responseMimeType: "application/json" }
   });
 
   try {
     const text = response.text || "{}";
-    const data = JSON.parse(text);
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({ title: c.web?.title, uri: c.web?.uri })).filter((s: any) => s.uri) || [];
-    return { ...data, sources };
+    return JSON.parse(text);
   } catch (e) {
-    return { narrative: "O destino se fragmentou.", sources: [] };
+    return { 
+      narrative: "Até eu, o narrador, perdi as palavras com essa sua burrice. Parabéns.", 
+      suggestions: ["Tentar de novo", "Chorar no banho"],
+      actionEvaluation: { status: 'ERRO', damageDealt: 0, qiCost: 10 }
+    };
   }
 };
