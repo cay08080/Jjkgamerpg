@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jujutsu: Além do Vazio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cursed-purple: #a855f7;
+            --cursed-blue: #3b82f6;
+            --cursed-red: #ef4444;
+            --bg-dark: #050508;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #110c1f 0%, #050508 100%);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Efeito de Scanlines mais leve e seguro */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            background-size: 100% 4px;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .font-bungee { font-family: 'Bungee', cursive; }
+        .font-marker { font-family: 'Permanent Marker', cursive; }
+
+        .glass-panel {
+            background: rgba(15, 15, 25, 0.85); /* Fallback para navegadores sem blur */
+            @supports (backdrop-filter: blur(24px)) {
+                background: rgba(10, 10, 15, 0.75);
+                backdrop-filter: blur(24px);
+            }
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes message-in {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-message { animation: message-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+        /* Kokusen Impacto Seguro (Glow em vez de Invert) */
+        @keyframes kokusen-total {
+            0% { box-shadow: 0 0 0px transparent; transform: scale(1); }
+            10% { box-shadow: 0 0 100px var(--cursed-purple); transform: scale(1.05); }
+            20% { box-shadow: 0 0 40px var(--cursed-red); transform: scale(1.02); }
+            100% { box-shadow: 0 0 0px transparent; transform: scale(1); }
+        }
+        .kokusen-active { animation: kokusen-total 0.6s ease-out; }
+
+        @keyframes screen-shake {
+            0% { transform: translate(1px, 1px); }
+            25% { transform: translate(-1px, -1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+        .shake { animation: screen-shake 0.1s 5; }
+
+        @keyframes bar-low-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; filter: brightness(1.5); }
+        }
+        .animate-critical { animation: bar-low-pulse 0.5s infinite ease-in-out; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #root {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div id="root"></div>
+</body>
+</html>
